@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html ng-app="ionicApp">
+<head>
+    <meta charset="utf-8" />
+    <title>ItadRegisterApp</title>
+    <link href="css/ionic.min.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet" />
+</head>
+<body>
+    <ion-nav-view></ion-nav-view>
+    <script src="scripts/lib/winstore-jscompat.js"></script>
+    <script src="scripts/lib/ionic.bundle.min.js"></script>
+    <!-- Cordova reference, this is added to your app when it's built. -->
+    <script src="cordova.js"></script>
+    <script src="scripts/platformOverrides.js"></script>
+
+    <script src="scripts/lib/jquery-2.1.4.js"></script>
+    <script src="scripts/lib/jquery.signalR-2.2.0.js"></script>
+    <script src="http://localhost:47216/signalr/hubs"></script>
+    <script src="scripts/app/app.js"></script>
+    <script src="scripts/app/services/localStorageFactory.js"></script>
+    <script src="scripts/app/services/appEmailService.js"></script>
+    <script src="scripts/app/services/hubProxyService.js"></script>
+    <script src="scripts/app/services/activeCameraService.js"></script>
+    <script src="scripts/app/services/apiService.js"></script>
+    <script src="scripts/app/services/errorService.js"></script>
+    <script src="scripts/app/services/registeredPersonService.js"></script>
+    <script src="scripts/app/services/summaryService.js"></script>
+    <script src="scripts/app/services/backButtonService.js"></script>
+    <script src="scripts/app/controllers/MainCtrl.js"></script>
+
+    <script id="templates/home.html" type="text/ng-template">
+        <ion-view ng-hide="mainCtrl.isCameraActive() === true" ng-show="mainCtrl.isCameraActive() === false">
+            <ion-content class="align-center ion-bg" has-bouncing="true">
+                <div class="padding-l-b text-center">
+                    <p class="margin-h-b">
+                        Witamy w aplikacji potwierdzającej rejestrację na konferencję ITADBB 2015.
+                    </p>
+                    <p>Podaj email osoby rejestrującej:</p>
+                    <div class="row">
+                        <div class="list col col-50 col-offset-25" ng-form name="form">
+                            <label class="item item-input" ng-class="{'has-error':form.email.$invalid && form.email.$touched}">
+                                <span class="input-label">Adres email</span>
+                                <input type="email" placeholder="Email" ng-model="email" required name="email"
+                                       id="email">
+                                <span class="form-error" ng-show="form.email.$error.required && form.email.$touched">Podaj adres email!</span>
+                                <span class="form-error"
+                                      ng-show="form.email.$error.email && form.email.$touched">To nie jest prawidłowy adres email!</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button class="button button-large button-calm align-center button-35-width-bordered margin-h-b" ng-class="{'disabled':form.$invalid || main.processing==true}" ng-click="mainCtrl.register(email)">
+                        Zapisz email i rozpocznij skanowanie
+                    </button>
+                </div>
+                <div ng-init="mainCtrl.init()"></div>
+            </ion-content>
+        </ion-view>
+    </script>
+
+    <script id="templates/result.html" type="text/ng-template">
+        <ion-view ng-show="mainCtrl.isCameraActive() == false">
+            <ion-content class="align-center ion-bg" has-bouncing="true">
+                <div class="margin-l-b" style="margin-left:2.5%">
+                    <h2 class="itad-color"><b>Witaj <span style="text-transform:uppercase">{{mainCtrl.returnFullName()}}!</span></b></h2>
+                    <h3 class="margin-m-b">
+                        Właśnie zameldowałeś się na <b>IT Academic Day</b><br />w Bielsku-Białej
+                    </h3>
+                    <div style="height:120px; margin-left:-5px;">
+                        <img src="images/bag.png" style="float:left;margin-top:10px" class="img-responsive" />
+                        <div style="float:left">
+                            <h2>Poczekaj na swojego giftpacka :)</h2>
+                            <h3>Koszulka: <span class="itad-color">{{mainCtrl.returnSize()}}</span></h3>
+                        </div>
+                    </div>
+                    <div style="float:none;clear:both;">&nbsp;</div>
+
+                    <h1>Czekamy na Ciebie w sali <b>L128!</b></h1>
+                </div>
+            </ion-content>
+        </ion-view>
+    </script>
+
+    <script id="templates/loading.html" type="text/ng-template">
+        <ion-view>
+            <ion-content class="align-center  ion-bg" has-bouncing="true">
+                <div class="padding margin-h-b" id="loading-spinner-container">
+                    <ion-spinner icon="android" id="loadingSpinner" class="spinner-calm"></ion-spinner>
+                    <p class="text-center">Rejestruję...</p>
+                </div>
+            </ion-content>
+        </ion-view>
+    </script>
+
+    <script id="templates/error.html" type="text/ng-template">
+        <ion-view ng-show="mainCtrl.isCameraActive() == false">
+            <ion-content class="align-center  ion-bg" has-bouncing="true">
+                <div class="margin-l-b" style="margin-left:2.5%">
+                    <h1 style="font-size:80px"><b style="color:#ff0000">UWAGA!</b></h1>
+                    <h2><b>WYSTĄPIŁ BŁĄD!</b></h2>
+                    <br />
+                    <h3>Szczegóły błędu</h3>
+                    <h4 style="text-transform:uppercase">{{mainCtrl.returnError()}}</h4>
+                </div>
+            </ion-content>
+        </ion-view>
+    </script>
+
+
+</body>
+</html>
