@@ -32,6 +32,8 @@
 
 
         function onPause() {
+            hubProxy.invoke('disconnect', appEmailService.getEmail(), 0);
+            hubProxy.stop();
             goToHome();
         }
 
@@ -45,7 +47,7 @@
                 setTimeout(function () {
                     hubProxy.invoke('lockDevice', email, data);
                     resendData(data, email);
-                }, 2500);
+                }, 3000);
             }
         }
 
@@ -63,7 +65,6 @@
         }
 
         function onErrorBackToHome() {
-            hubProxy.stop();
             activeCameraService.setActiveState();
             activeCameraService.setNonActive();
             appEmailService.clearEmail();
@@ -92,15 +93,21 @@
             cordova.plugins.barcodeScanner.scan(
                 function (result) {
                     if (result.text !== "" && result.cancelled !== true) {
-                        goToLoading();
                         activeCameraService.setNonActiveState();
                         activeCameraService.setNonActive();
-                        postData(result);
+                        goToLoading();
+                        setTimeout(function() {
+                            postData(result);
+                        }, 1000);
                     } else {
+                        hubProxy.invoke('disconnect', appEmailService.getEmail(), 0);
+                        hubProxy.stop();
                         onErrorBackToHome();
                     }
                 },
                 function (error) {
+                    hubProxy.invoke('disconnect', appEmailService.getEmail(), 0);
+                    hubProxy.stop();
                     onErrorBackToHome();
                 }
             );
@@ -140,7 +147,6 @@
             vm.apiEmail = appEmailService.getEmail();
             activeCameraService.setActiveState();
             activeCameraService.setActive();
-            hubProxy.stop();
             hubProxy.start(function () {
                 hubProxy.invoke('connect', appEmailService.getEmail(), hubProxy.connection.id, 0);
                 setTimeout(function () {
@@ -164,8 +170,6 @@
         hubProxy.on('checkAppIsWaiting', function () {
             if (activeCameraService.isActiveCamera() === false && vm.apiData != null) {
                 hubProxy.invoke('lockDevice', appEmailService.getEmail(), vm.apiData);
-            } else {
-                hubProxy.invoke('unlockDeviceUserCallback', appEmailService.getEmail());
             }
         });
     }
