@@ -2,7 +2,7 @@
     'use strict';
 
     function apiService($http,$q) {
-        var globalPath = "https://itad.reset.ath.eu/Api/Qr";
+        var globalPath = "http://itad.reset.ath.eu/Api/Qr";
         var staticTokenForTests = "kn432k4n32b4325n34lk5ms23423423423901adsjkdn5465ujojzcxzasdasdas";
 
         function getGuestsCount() {

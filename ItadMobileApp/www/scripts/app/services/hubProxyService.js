@@ -7,6 +7,8 @@
             var connection = $.hubConnection(signalRServer);
             var proxy = connection.createHubProxy(hubName);
 
+            connection.start(startOptions).done(function () {});
+
             var on = function (eventName, callback) {
                 proxy.on(eventName, function (result) {
                     $rootScope.$apply(function () {
@@ -48,7 +50,7 @@
                     connection.start(startOptions).done(function () {
                         invoke('connect', appEmailService.getEmail(), connection.id, 0);
                     });
-                }, 3000);
+                }, 5000);
             });
 
             return {

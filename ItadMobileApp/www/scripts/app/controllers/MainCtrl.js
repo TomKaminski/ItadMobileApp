@@ -7,6 +7,7 @@
         var vm = this;
         var hubProxy = hubProxyService(hubProxyService.defaultServer, 'CheckInHub', { logging: true });
         vm.apiEmail = appEmailService.getEmail();
+        vm.apiData = null;
 
         document.addEventListener('resume', onResume, false);
         document.addEventListener('pause', onPause, false);
@@ -39,60 +40,53 @@
             $state.go('loading');
         }
 
-        function goToSummary(person) {
-            deleteCameraPreview();
-            $state.go('result');
-            registeredPersonService.fillPerson(person);
+        function resendData(data, email) {
+            if (vm.userRecievedMessage === false) {
+                setTimeout(function () {
+                    hubProxy.invoke('lockDevice', email, data);
+                    resendData(data, email);
+                }, 2500);
+            }
         }
 
-        function goToError() {
+        function goToSummary(data) {
+            deleteCameraPreview();
+            $state.go('result');
+            registeredPersonService.fillPerson(data.Person);
+            resendData(data, appEmailService.getEmail());
+        }
+
+        function goToError(data) {
             deleteCameraPreview();
             $state.go('error');
+            resendData(data, appEmailService.getEmail());
+        }
+
+        function onErrorBackToHome() {
+            hubProxy.stop();
+            activeCameraService.setActiveState();
+            activeCameraService.setNonActive();
+            appEmailService.clearEmail();
+            goToHome();
         }
 
         function postData(result) {
-            setTimeout(function () {
-                apiService.checkIn(result).then(function (data) {
-                    if (data.Status === true) {
-                        hubProxy.invoke('LockDevice', vm.apiEmail, data);
-                        goToSummary(data.Person);
-                    } else {
-                        hubProxy.invoke('LockDevice', vm.apiEmail, data);
-                        errorService.setError(data.Error);
-                        goToError();
-                    }
-                }, function () {
-                    errorService.setError("Wystąpił błąd połączenia");
-                    goToError();
-                });
-            }, 500);
-        }
+            apiService.checkIn(result).then(function (data) {
+                var dataTemp = data;
+                vm.apiData = data;
+                vm.userRecievedMessage = false;
+                hubProxy.invoke('LockDevice', appEmailService.getEmail(), dataTemp);
 
-        //OLD POST LOGIC
-        //    function postData(result) {
-        //        hubProxy.stop();
-        //        hubProxy.start(function () {
-        //            setTimeout(function () {
-        //                hubProxy.invoke('connect', appEmailService.getEmail(), hubProxy.connection.id, 0);
-        //                setTimeout(function () {
-        //                    apiService.checkIn(result).then(function (data) {
-        //                        if (data.Status === true) {
-        //                            hubProxy.invoke('LockDevice', vm.apiEmail, data);
-        //                            goToSummary(data.Person);
-        //                            postSummary();
-        //                        } else {
-        //                            hubProxy.invoke('LockDevice', vm.apiEmail, data);
-        //                            errorService.setError(data.Error);
-        //                            goToError();
-        //                        }
-        //                    }, function () {
-        //                        errorService.setError("Wystąpił błąd połączenia");
-        //                        goToError();
-        //                    });
-        //                }, 500);
-        //            }, 500);
-        //        });
-        //}
+                if (data.Status === true) {
+                    goToSummary(dataTemp);
+                } else {
+                    errorService.setError(dataTemp.Error);
+                    goToError(dataTemp);
+                }
+            }, function () {
+                onErrorBackToHome();
+            });
+        }
 
         function registerFunc() {
             cordova.plugins.barcodeScanner.scan(
@@ -103,54 +97,22 @@
                         activeCameraService.setNonActive();
                         postData(result);
                     } else {
-                        hubProxy.stop();
-                        activeCameraService.setActiveState();
-                        activeCameraService.setNonActive();
-                        appEmailService.clearEmail();
-                        goToHome();
+                        onErrorBackToHome();
                     }
                 },
                 function (error) {
-                    hubProxy.stop();
-                    activeCameraService.setActiveState();
-                    activeCameraService.setNonActive();
-                    appEmailService.clearEmail();
-                    goToHome();
+                    onErrorBackToHome();
                 }
             );
         }
 
         function onResume() {
-            if (activeCameraService.isActiveCameraState() === true) {
-                activeCameraService.setActiveState();
-                activeCameraService.setActive();
-                setTimeout(function () {
-                    registerFunc();
-                }, 1000);
-            }
-        }
-
-        vm.init = function () {
-            activeCameraService.setNonActiveState();
-            activeCameraService.setNonActive();
-            if (vm.apiEmail !== false) {
-                activeCameraService.setActiveState();
-                activeCameraService.setActive();
-                hubProxy.start(function () {
-                    hubProxy.invoke('connect', appEmailService.getEmail(), hubProxy.connection.id, 0);
-                    setTimeout(function () {
-                        registerFunc();
-                    }, 500);
-                });
-            }
+            deleteCameraPreview();
+            onErrorBackToHome();
         }
 
         vm.getSummaryString = function () {
             return summaryService.getSummaryString();
-        }
-
-        vm.getEmail = function () {
-            return appEmailService.getEmail();
         }
 
         vm.isCameraActive = function () {
@@ -173,15 +135,12 @@
             return errorService.returnError();
         }
 
-        vm.refreshSummary = function () {
-            postSummary();
-        }
-
         vm.register = function (appEmailInput) {
             appEmailService.setEmail(appEmailInput);
             vm.apiEmail = appEmailService.getEmail();
             activeCameraService.setActiveState();
             activeCameraService.setActive();
+            hubProxy.stop();
             hubProxy.start(function () {
                 hubProxy.invoke('connect', appEmailService.getEmail(), hubProxy.connection.id, 0);
                 setTimeout(function () {
@@ -191,10 +150,23 @@
         }
 
         hubProxy.on('unlockDevice', function () {
-            hubProxy.invoke('UnlockDeviceUserCallback', appEmailService.getEmail());
+            vm.apiData = null;
+            hubProxy.invoke('unlockDeviceUserCallback', appEmailService.getEmail());
             activeCameraService.setActiveState();
             activeCameraService.setActive();
             registerFunc();
+        });
+
+        hubProxy.on('userRecievedMessageCallback', function () {
+            vm.userRecievedMessage = true;
+        });
+
+        hubProxy.on('checkAppIsWaiting', function () {
+            if (activeCameraService.isActiveCamera() === false && vm.apiData != null) {
+                hubProxy.invoke('lockDevice', appEmailService.getEmail(), vm.apiData);
+            } else {
+                hubProxy.invoke('unlockDeviceUserCallback', appEmailService.getEmail());
+            }
         });
     }
 

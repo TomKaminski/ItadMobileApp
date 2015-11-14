@@ -105,4 +105,11 @@
     <splash src="res/screens/wp8/SplashScreenImage.jpg" width="480" height="800" />
   </platform>
   <vs:plugin name="phonegap-plugin-barcodescanner" version="4.1.0" src="https://github.com/phonegap/phonegap-plugin-barcodescanner" />
+  <vs:platformSpecificValues>
+    <vs:platformSpecificWidget platformName="windows" version="1.0.0.21">
+      <vs:certFile>CordovaApp.pfx</vs:certFile>
+      <vs:appxPackageIsForStore>False</vs:appxPackageIsForStore>
+      <vs:packageOutputPath>E:\apka\</vs:packageOutputPath>
+    </vs:platformSpecificWidget>
+  </vs:platformSpecificValues>
 </widget>

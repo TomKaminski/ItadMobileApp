@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module("ionicApp", ["ionic"])
-        .value('signalRServer', 'https://itad.reset.ath.eu/signalr')
+        .value('signalRServer', 'http://itad.reset.ath.eu/signalr')
         .constant('$', window.jQuery)
         .config(function ($stateProvider, $urlRouterProvider) {
 
