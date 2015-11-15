@@ -44,7 +44,7 @@
 
         function resendData(data, email) {
             if (vm.userRecievedMessage === false) {
-                setTimeout(function () {
+                $timeout(function() {
                     hubProxy.invoke('lockDevice', email, data);
                     resendData(data, email);
                 }, 3000);
@@ -96,7 +96,7 @@
                         activeCameraService.setNonActiveState();
                         activeCameraService.setNonActive();
                         goToLoading();
-                        setTimeout(function() {
+                        $timeout(function() {
                             postData(result);
                         }, 1000);
                     } else {
@@ -149,9 +149,9 @@
             activeCameraService.setActive();
             hubProxy.start(function () {
                 hubProxy.invoke('connect', appEmailService.getEmail(), hubProxy.connection.id, 0);
-                setTimeout(function () {
+                $timeout(function() {
                     registerFunc();
-                }, 500);
+                }, 1000);
             });
         }
 

@@ -1,7 +1,7 @@
 ﻿(function () {
     'use strict';
 
-    function hubProxyService($rootScope, $, signalRServer, appEmailService) {
+    function hubProxyService($timeout, $, signalRServer, appEmailService) {
         function signalRHubProxyFactory(serverUrl, hubName, startOptions) {
 
             var connection = $.hubConnection(signalRServer);
@@ -9,7 +9,7 @@
 
             var on = function (eventName, callback) {
                 proxy.on(eventName, function (result) {
-                    $rootScope.$apply(function () {
+                    $timeout(function() {
                         if (callback) {
                             callback(result);
                         }
@@ -34,7 +34,7 @@
 
             var off = function (eventName, callback) {
                 proxy.off(eventName, function (result) {
-                    $rootScope.$apply(function () {
+                    $timeout(function () {
                         if (callback) {
                             callback(result);
                         }
@@ -43,7 +43,7 @@
             }
 
             connection.disconnected(function () {
-                setTimeout(function () {
+                $timeout(function () {
                     connection.start(startOptions).done(function () {
                         invoke('connect', appEmailService.getEmail(), connection.id, 0);
                     });
