@@ -94,7 +94,7 @@
     </platform>
     <vs:plugin name="phonegap-plugin-barcodescanner" src="https://github.com/phonegap/phonegap-plugin-barcodescanner" version="4.1.0" />
     <vs:platformSpecificValues>
-        <vs:platformSpecificWidget platformName="windows" version="1.0.0.7">
+        <vs:platformSpecificWidget platformName="windows" version="1.0.0.9">
             <vs:certFile>CordovaApp.pfx</vs:certFile>
         </vs:platformSpecificWidget>
     </vs:platformSpecificValues>

@@ -156,11 +156,13 @@
         }
 
         hubProxy.on('unlockDevice', function () {
-            vm.apiData = null;
-            hubProxy.invoke('unlockDeviceUserCallback', appEmailService.getEmail());
-            activeCameraService.setActiveState();
-            activeCameraService.setActive();
-            registerFunc();
+            if (activeCameraService.isActiveCamera() === false) {
+                vm.apiData = null;
+                hubProxy.invoke('unlockDeviceUserCallback', appEmailService.getEmail());
+                activeCameraService.setActiveState();
+                activeCameraService.setActive();
+                registerFunc();
+            }
         });
 
         hubProxy.on('userRecievedMessageCallback', function () {
