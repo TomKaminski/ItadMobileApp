@@ -1,5 +1,5 @@
 ﻿(function() {
-    'use-strict';
+    "use-strict";
 
     function errorService() {
         var error = "";
@@ -23,6 +23,5 @@
         };
     }
 
-    angular.module('ionicApp').service('errorService', errorService);
+    angular.module("ionicApp").service("errorService", errorService);
 })();
-

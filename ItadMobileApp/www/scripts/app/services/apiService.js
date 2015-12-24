@@ -5,15 +5,15 @@
         var globalPath = "http://itad.reset.ath.eu/Api/Qr";
         var staticTokenForTests = "kn432k4n32b4325n34lk5ms23423423423901adsjkdn5465ujojzcxzasdasdas";
 
-        function getGuestsCount() {
-            var defered = $q.defer();
-            $http.post(globalPath + "/GetGuestsCount").success(function(data) {
-                defered.resolve(data);
-            }).error(function() {
-                defered.reject(false);
-            });
-            return defered.promise;
-        }
+        //function getGuestsCount() {
+        //    var defered = $q.defer();
+        //    $http.post(globalPath + "/GetGuestsCount").success(function(data) {
+        //        defered.resolve(data);
+        //    }).error(function() {
+        //        defered.reject(false);
+        //    });
+        //    return defered.promise;
+        //}
 
         function checkIn(result) {
             var defered = $q.defer();
@@ -26,7 +26,7 @@
         }
 
         return {
-            getGuestsCount: getGuestsCount,
+            //getGuestsCount: getGuestsCount,
             checkIn: checkIn
         };
     }

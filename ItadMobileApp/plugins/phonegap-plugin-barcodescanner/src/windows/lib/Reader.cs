@@ -155,13 +155,11 @@ namespace WinRTBarcodeReader
 
             var decoder = await BitmapDecoder.CreateAsync(imageStream);
 
-            byte[] pixels =
-                (await
-                    decoder.GetPixelDataAsync(BitmapPixelFormat.Rgba8,
-                        BitmapAlphaMode.Ignore,
-                        new BitmapTransform(),
-                        ExifOrientationMode.IgnoreExifOrientation,
-                        ColorManagementMode.DoNotColorManage)).DetachPixelData();
+            byte[] pixels = (await decoder.GetPixelDataAsync(BitmapPixelFormat.Rgba8,
+                BitmapAlphaMode.Ignore,
+                new BitmapTransform(),
+                ExifOrientationMode.IgnoreExifOrientation,
+                ColorManagementMode.DoNotColorManage)).DetachPixelData();
 
             const BitmapFormat format = BitmapFormat.RGB32;
 
